@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сканирование - Security Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Темная тема */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border-color: #2a2a3e;
+            --shadow-color: rgba(0,0,0,0.5);
+            --input-bg: #1a1a2e;
+            --card-hover: #2a2a3e;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --shadow-color: rgba(0,0,0,0.1);
+            --input-bg: #f8f9fa;
+            --card-hover: #f8f9fa;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        /* Навигация */
+        nav {
+            background: var(--bg-secondary) !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] nav {
+            background: rgba(20, 20, 31, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Переключатель темы */
+        .theme-toggle {
+            width: 60px;
+            height: 30px;
+            background: #2a2a3e;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .theme-toggle.light {
+            background: #e0e0e0;
+        }
+        
+        .theme-toggle .toggle-circle {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .theme-toggle.light .toggle-circle {
+            left: 33px;
+            background: #1a1a2e;
+        }
+        
+        /* Основные элементы */
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-card { background-color: var(--bg-card); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-custom { border-color: var(--border-color); }
+        
+        .scan-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        [data-theme="dark"] .gradient-bg {
+            background: linear-gradient(135deg, #5a4bd1 0%, #8b5cf6 100%);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        
+        .severity-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-critical { background: #dc3545; color: white; }
+        .badge-high { background: #fd7e14; color: white; }
+        .badge-medium { background: #ffc107; color: #212529; }
+        .badge-low { background: #28a745; color: white; }
+        .badge-info { background: #17a2b8; color: white; }
+        
+        .vuln-item {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 5px solid #6c757d;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .vuln-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        
+        .vuln-critical { border-left-color: #dc3545; }
+        .vuln-high { border-left-color: #fd7e14; }
+        .vuln-medium { border-left-color: #ffc107; }
+        .vuln-low { border-left-color: #28a745; }
+        .vuln-info { border-left-color: #17a2b8; }
+        
+        .vuln-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        
+        .vuln-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .vuln-remediation {
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .vuln-remediation strong {
+            color: #28a745;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--shadow-color);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 900;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .recommendations-box {
+            background: var(--bg-card);
+            border: 1px solid #667eea;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        
+        [data-theme="dark"] .recommendations-box {
+            border-color: #5a4bd1;
+        }
+        
+        .recommendations-box h3 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .recommendations-box li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            color: var(--text-secondary);
+        }
+        
+        .recommendations-box li::before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+        }
+        
+        .scanning-status {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .scan-card { padding: 20px; }
+            .stat-number { font-size: 28px; }
+            .btn-primary { padding: 12px 30px; font-size: 14px; }
+            .vuln-item { padding: 16px; }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="fixed w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-primary">Security<span class="gradient-text">Scanner</span></span>
+                    <span class="ml-2 text-xs bg-purple-100 text-purple-600 px-3 py-1 rounded-full font-semibold">DevSecOps</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-primary hover:text-purple-600 transition-colors font-medium">Главная</a>
+                    <a href="/scan" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-play mr-2"></i>Сканировать
+                    </a>
+                    
+                    <!-- Переключатель темы -->
+                    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
+                        <div class="toggle-circle" id="toggleCircle">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        <div class="scan-card">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-bold text-primary">
+                    <i class="fas fa-scan text-purple-600 mr-3"></i>
+                    Сканирование безопасности
+                </h1>
+                <span class="text-sm text-secondary">
+                    <i class="fas fa-clock mr-1"></i>
+                    Обновлено: <span id="updateTime">только что</span>
+                </span>
+            </div>
+            
+            <!-- Кнопка запуска -->
+            <div id="scanControl" class="text-center py-8">
+                <button id="startScanBtn" class="btn-primary">
+                    <i class="fas fa-play mr-2"></i>
+                    Запустить сканирование
+                </button>
+                <p class="text-secondary text-sm mt-4">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Сканирование займет около 2-3 минут
+                </p>
+            </div>
+            
+            <!-- Прогресс -->
+            <div id="progressSection" class="hidden mt-6">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-medium text-primary" id="statusText">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Сканирование в процессе
+                    </span>
+                    <span class="text-sm font-bold text-primary" id="progressText">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="gradient-bg h-3 rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 text-center">
+                    <span class="text-sm text-secondary scanning-status" id="scanningStatus">
+                        <i class="fas fa-microchip mr-2"></i>
+                        Инициализация модулей...
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Результаты -->
+            <div id="resultsSection" class="hidden mt-8 fade-in">
+                <!-- Статистика -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="stat-card">
+                        <div class="stat-number text-red-600" id="totalVulns">0</div>
+                        <div class="stat-label">Всего уязвимостей</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number text-red-600" id="criticalVulns">0</div>
+                        <div class="stat-label">Критических</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number text-orange-500" id="highVulns">0</div>
+                        <div class="stat-label">Высоких</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number text-green-600" id="lowVulns">0</div>
+                        <div class="stat-label">Низких</div>
+                    </div>
+                </div>
+                
+                <!-- Информация о системе -->
+                <div class="bg-secondary rounded-xl p-4 mb-6 border border-custom">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                            <span class="text-secondary">Хост:</span>
+                            <span class="font-medium text-primary block" id="hostname">-</span>
+                        </div>
+                        <div>
+                            <span class="text-secondary">ОС:</span>
+                            <span class="font-medium text-primary block" id="osInfo">-</span>
+                        </div>
+                        <div>
+                            <span class="text-secondary">Время сканирования:</span>
+                            <span class="font-medium text-primary block" id="scanDuration">-</span>
+                        </div>
+                        <div>
+                            <span class="text-secondary">Рекомендаций:</span>
+                            <span class="font-medium text-primary block" id="recommendationsCount">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="flex flex-wrap gap-3 mb-8">
+                    <button onclick="downloadReport('html')" class="btn-secondary">
+                        <i class="fas fa-file-code mr-2"></i>
+                        Скачать HTML отчет
+                    </button>
+                    <button onclick="downloadReport('json')" class="btn-secondary">
+                        <i class="fas fa-file-code mr-2"></i>
+                        Скачать JSON отчет
+                    </button>
+                    <button onclick="window.print()" class="btn-secondary">
+                        <i class="fas fa-print mr-2"></i>
+                        Печать
+                    </button>
+                </div>
+                
+                <!-- Список уязвимостей -->
+                <div id="vulnerabilitiesList">
+                    <h3 class="text-xl font-bold text-primary mb-4">
+                        <i class="fas fa-bug mr-2 text-purple-600"></i>
+                        Найденные уязвимости
+                    </h3>
+                    <div id="vulnContainer"></div>
+                </div>
+                
+                <!-- Рекомендации -->
+                <div id="recommendationsSection" class="recommendations-box">
+                    <h3>
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Рекомендации по усилению безопасности (Hardening)
+                    </h3>
+                    <ul id="recommendationsList" class="space-y-1"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функция переключения темы
+        function toggleTheme() {
+            const root = document.getElementById('html-root');
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            if (root.getAttribute('data-theme') === 'dark') {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.remove('light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                toggle.classList.add('light');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Загрузка сохраненной темы
+        function loadTheme() {
+            const root = document.getElementById('html-root');
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            
+            if (savedTheme === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+                toggle.classList.add('light');
+                icon.className = 'fas fa-sun';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.remove('light');
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        let scanInterval = null;
+        let currentReportId = null;
+
+        document.getElementById('startScanBtn').addEventListener('click', startScan);
+
+        async function startScan() {
+            const btn = document.getElementById('startScanBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Запуск...';
+            
+            try {
+                const response = await fetch('/api/scan/start', { method: 'POST' });
+                if (!response.ok) throw new Error('Ошибка запуска сканирования');
+                
+                document.getElementById('progressSection').classList.remove('hidden');
+                document.getElementById('resultsSection').classList.add('hidden');
+                document.getElementById('scanningStatus').textContent = '⏳ Инициализация модулей...';
+                
+                scanInterval = setInterval(checkStatus, 1000);
+                
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play mr-2"></i> Запустить сканирование';
+            }
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/scan/status');
+                const data = await response.json();
+                
+                document.getElementById('progressBar').style.width = data.progress + '%';
+                document.getElementById('progressText').textContent = data.progress + '%';
+                
+                const statusMessages = [
+                    '🔍 Анализ операционной системы...',
+                    '📦 Проверка установленных пакетов...',
+                    '🛡️ Сканирование брандмауэра...',
+                    '🔌 Проверка служб и портов...',
+                    '📊 Генерация отчета...'
+                ];
+                const idx = Math.min(Math.floor(data.progress / 20), statusMessages.length - 1);
+                document.getElementById('scanningStatus').textContent = '⏳ ' + statusMessages[idx];
+                
+                if (data.status === 'completed') {
+                    clearInterval(scanInterval);
+                    document.getElementById('statusText').innerHTML = 
+                        '<i class="fas fa-check-circle text-green-500 mr-2"></i> Сканирование завершено! ✅';
+                    document.getElementById('scanningStatus').textContent = '✅ Готово!';
+                    
+                    await loadResults();
+                    
+                    const btn = document.getElementById('startScanBtn');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-redo mr-2"></i> Новое сканирование';
+                } else if (data.status === 'error') {
+                    clearInterval(scanInterval);
+                    alert('❌ Ошибка сканирования: ' + data.error);
+                    const btn = document.getElementById('startScanBtn');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play mr-2"></i> Запустить сканирование';
+                }
+            } catch (error) {
+                console.error('Ошибка проверки статуса:', error);
+            }
+        }
+
+        async function loadResults() {
+            try {
+                const response = await fetch('/api/scan/result');
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                
+                currentReportId = data.report_id;
+                
+                // Статистика
+                document.getElementById('totalVulns').textContent = data.total || 0;
+                document.getElementById('criticalVulns').textContent = data.severities?.CRITICAL || 0;
+                document.getElementById('highVulns').textContent = data.severities?.HIGH || 0;
+                document.getElementById('lowVulns').textContent = data.severities?.LOW || 0;
+                
+                // Информация о системе
+                document.getElementById('hostname').textContent = data.hostname || '-';
+                document.getElementById('osInfo').textContent = data.os || '-';
+                document.getElementById('scanDuration').textContent = data.duration ? 
+                    data.duration.toFixed(2) + ' сек' : '-';
+                document.getElementById('recommendationsCount').textContent = 
+                    data.recommendations?.length || 0;
+                
+                // Список уязвимостей
+                const vulnContainer = document.getElementById('vulnContainer');
+                vulnContainer.innerHTML = '';
+                
+                if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+                    data.vulnerabilities.forEach((vuln, index) => {
+                        const severityClass = vuln.severity?.toLowerCase() || 'info';
+                        const badgeClass = 'badge-' + severityClass;
+                        const div = document.createElement('div');
+                        div.className = `vuln-item vuln-${severityClass}`;
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start flex-wrap gap-2">
+                                <div class="flex-1">
+                                    <div class="vuln-title">${index + 1}. ${vuln.title || 'Без названия'}</div>
+                                    <div class="vuln-desc">${vuln.description || 'Описание отсутствует'}</div>
+                                    <div class="text-xs text-secondary mt-1">
+                                        <span class="font-medium">Компонент:</span> ${vuln.component || 'N/A'}
+                                        ${vuln.cve ? ` | <span class="font-medium">CVE:</span> ${vuln.cve}` : ''}
+                                        ${vuln.cvss ? ` | <span class="font-medium">CVSS:</span> ${vuln.cvss}` : ''}
+                                        <span class="font-medium">Категория:</span> ${vuln.category || 'N/A'}
+                                    </div>
+                                    <div class="vuln-remediation">
+                                        <strong>🔧 Исправление:</strong>
+                                        <span>${vuln.remediation || 'Не указано'}</span>
+                                    </div>
+                                </div>
+                                <span class="severity-badge ${badgeClass} flex-shrink-0">
+                                    ${vuln.severity || 'INFO'}
+                                </span>
+                            </div>
+                        `;
+                        vulnContainer.appendChild(div);
+                    });
+                } else {
+                    vulnContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <h3 class="text-xl font-bold text-primary">Уязвимостей не обнаружено! 🎉</h3>
+                            <p class="text-secondary">Ваша система в безопасности</p>
+                        </div>
+                    `;
+                }
+                
+                // Рекомендации
+                const recList = document.getElementById('recommendationsList');
+                recList.innerHTML = '';
+                if (data.recommendations && data.recommendations.length > 0) {
+                    data.recommendations.forEach(rec => {
+                        const li = document.createElement('li');
+                        li.textContent = rec;
+                        recList.appendChild(li);
+                    });
+                } else {
+                    recList.innerHTML = '<li class="text-secondary">Рекомендаций нет</li>';
+                }
+                
+                document.getElementById('resultsSection').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки результатов:', error);
+            }
+        }
+
+        async function downloadReport(format) {
+            try {
+                const response = await fetch('/api/scan/result');
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('❌ Отчет не найден');
+                    return;
+                }
+                
+                if (format === 'html' && data.html_report) {
+                    window.open(data.html_report, '_blank');
+                } else if (format === 'json' && data.json_report) {
+                    window.open(data.json_report, '_blank');
+                } else {
+                    alert('❌ Отчет в формате ' + format.toUpperCase() + ' не найден');
+                }
+            } catch (error) {
+                alert('❌ Ошибка загрузки отчета: ' + error.message);
+            }
+        }
+
+        // Загрузка темы при старте
+        loadTheme();
+        
+        // Обновление времени
+        document.getElementById('updateTime').textContent = new Date().toLocaleTimeString();
+        setInterval(() => {
+            document.getElementById('updateTime').textContent = new Date().toLocaleTimeString();
+        }, 30000);
+    </script>
+</body>
+</html>

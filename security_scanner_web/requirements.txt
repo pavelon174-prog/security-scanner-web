@@ -1,0 +1,8 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+jinja2==3.1.4
+psutil==6.0.0
+python-multipart==0.0.12
+
+# Опционально — только если нужен экспорт отчёта в PDF (/api/report/{id}?format=pdf)
+weasyprint==62.3

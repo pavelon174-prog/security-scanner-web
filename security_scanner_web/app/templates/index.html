@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ru" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner - DevSecOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* Темная тема */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #14141f;
+            --bg-card: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border-color: #2a2a3e;
+            --shadow-color: rgba(0,0,0,0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .hero-gradient {
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 50%, #3d1f5e 100%);
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -50px;
+            right: -50px;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -30px;
+            left: -30px;
+            animation-delay: 2s;
+        }
+        
+        .shape:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            left: 50%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        [data-theme="dark"] .feature-icon {
+            background: linear-gradient(135deg, #8b7cf7 0%, #a855f7 100%);
+        }
+        
+        .pulse-button {
+            animation: pulse 2s infinite;
+            position: relative;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: scrollFade 0.8s ease forwards;
+        }
+        
+        @keyframes scrollFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Переключатель темы */
+        .theme-toggle {
+            width: 60px;
+            height: 30px;
+            background: #2a2a3e;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .theme-toggle.light {
+            background: #e0e0e0;
+        }
+        
+        .theme-toggle .toggle-circle {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .theme-toggle.light .toggle-circle {
+            left: 33px;
+            background: #1a1a2e;
+        }
+        
+        /* Навигация */
+        nav {
+            background: var(--bg-secondary) !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] nav {
+            background: rgba(20, 20, 31, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        .text-primary {
+            color: var(--text-primary);
+        }
+        
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+        
+        .bg-primary {
+            background-color: var(--bg-primary);
+        }
+        
+        .bg-secondary {
+            background-color: var(--bg-secondary);
+        }
+        
+        .border-custom {
+            border-color: var(--border-color);
+        }
+        
+        /* Секции */
+        [data-theme="dark"] #features {
+            background-color: #0a0a0f;
+        }
+        
+        [data-theme="dark"] .bg-gray-50 {
+            background-color: #0a0a0f;
+        }
+        
+        [data-theme="dark"] .bg-white {
+            background-color: #14141f;
+        }
+        
+        [data-theme="dark"] .text-gray-800 {
+            color: #e8e8e8;
+        }
+        
+        [data-theme="dark"] .text-gray-600 {
+            color: #a0a0b0;
+        }
+        
+        [data-theme="dark"] .text-gray-700 {
+            color: #c0c0d0;
+        }
+        
+        [data-theme="dark"] .text-gray-900 {
+            color: #ffffff;
+        }
+        
+        [data-theme="dark"] .border-gray-800 {
+            border-color: #2a2a3e;
+        }
+        
+        [data-theme="dark"] footer {
+            background-color: #0a0a0f !important;
+        }
+        
+        [data-theme="dark"] .bg-gray-900 {
+            background-color: #0a0a0f !important;
+        }
+        
+        [data-theme="dark"] .shadow-lg {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="fixed w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-primary">Security<span class="gradient-text">Scanner</span></span>
+                    <span class="ml-2 text-xs bg-purple-100 text-purple-600 px-3 py-1 rounded-full font-semibold">DevSecOps</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-primary hover:text-purple-600 transition-colors font-medium">Главная</a>
+                    <a href="/scan" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-play mr-2"></i>Сканировать
+                    </a>
+                    
+                    <!-- Переключатель темы -->
+                    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
+                        <div class="toggle-circle" id="toggleCircle">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center relative pt-16">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <div class="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                        <i class="fas fa-rocket mr-2"></i> Next-Gen Security
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-extrabold leading-tight mb-6">
+                        Защитите свою
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">
+                            систему
+                        </span>
+                        <br>за 2 минуты
+                    </h1>
+                    <p class="text-xl text-purple-100 mb-8 max-w-lg">
+                        Комплексный анализ уязвимостей, конфигураций и безопасности 
+                        с генерацией профессиональных отчетов в один клик
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <a href="/scan" class="group bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:shadow-2xl transition-all hover:scale-105 flex items-center">
+                            <i class="fas fa-shield-halved mr-3 group-hover:rotate-12 transition-transform"></i>
+                            Начать сканирование
+                            <i class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        <a href="#features" class="glass-card text-white px-8 py-4 rounded-full font-semibold hover:bg-white/20 transition-all">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Узнать больше
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 mt-10">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span class="text-sm">Бесплатно</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span class="text-sm">Кроссплатформенно</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-300"></i>
+                            <span class="text-sm">Open Source</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="glass-card rounded-3xl p-8 backdrop-blur-xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <div class="text-white/70 text-sm">Статистика сканирований</div>
+                                <div class="text-4xl font-bold text-white">1,284</div>
+                            </div>
+                            <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <i class="fas fa-chart-line text-green-400 text-2xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-white/80 text-sm mb-1">
+                                    <span>Обнаружено уязвимостей</span>
+                                    <span class="text-white font-bold">5</span>
+                                </div>
+                                <div class="w-full bg-white/10 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-red-500 to-yellow-500 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-white/80 text-sm mb-1">
+                                    <span>Уровень безопасности</span>
+                                    <span class="text-white font-bold">65%</span>
+                                </div>
+                                <div class="w-full bg-white/10 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-green-400 to-purple-500 h-2 rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-white/80 text-sm mb-1">
+                                    <span>Рекомендаций</span>
+                                    <span class="text-white font-bold">6</span>
+                                </div>
+                                <div class="w-full bg-white/10 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-white/10">
+                            <div class="flex items-center justify-between text-white/80 text-sm">
+                                <span><i class="fas fa-clock mr-2"></i>Среднее время</span>
+                                <span class="text-white font-bold">2.3 мин</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -top-10 -right-10 w-20 h-20 bg-yellow-400/20 rounded-full blur-xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-400/20 rounded-full blur-xl"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-primary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block bg-purple-100 text-purple-600 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    <i class="fas fa-star mr-2"></i> Почему Security Scanner
+                </span>
+                <h2 class="text-4xl font-bold text-primary mb-4">
+                    Всё что нужно для <span class="gradient-text">безопасности</span>
+                </h2>
+                <p class="text-secondary max-w-2xl mx-auto">
+                    Современный инструмент для анализа уязвимостей с профессиональными отчетами
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card scroll-animate delay-1">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3">Глубокое сканирование</h3>
+                    <p class="text-secondary leading-relaxed">
+                        Анализ операционной системы, устаревшего ПО, 
+                        конфигурации брандмауэра и опасных служб
+                    </p>
+                    <div class="mt-4 flex items-center text-purple-600 text-sm font-semibold">
+                        <span>50+ проверок</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <div class="feature-card scroll-animate delay-2">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3">Визуализация данных</h3>
+                    <p class="text-secondary leading-relaxed">
+                        Интерактивные графики и диаграммы для 
+                        наглядного анализа уязвимостей
+                    </p>
+                    <div class="mt-4 flex items-center text-purple-600 text-sm font-semibold">
+                        <span>Real-time отчеты</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+                
+                <div class="feature-card scroll-animate delay-3">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary mb-3">Отчеты в один клик</h3>
+                    <p class="text-secondary leading-relaxed">
+                        Профессиональные отчеты в HTML/PDF с 
+                        рекомендациями по hardening
+                    </p>
+                    <div class="mt-4 flex items-center text-purple-600 text-sm font-semibold">
+                        <span>Экспорт за секунду</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 bg-secondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="scroll-animate delay-1">
+                    <div class="stat-number">50+</div>
+                    <div class="text-secondary mt-2 font-medium">Проверок безопасности</div>
+                </div>
+                <div class="scroll-animate delay-2">
+                    <div class="stat-number">100%</div>
+                    <div class="text-secondary mt-2 font-medium">Кроссплатформенность</div>
+                </div>
+                <div class="scroll-animate delay-3">
+                    <div class="stat-number">&lt; 2</div>
+                    <div class="text-secondary mt-2 font-medium">Минут на сканирование</div>
+                </div>
+                <div class="scroll-animate delay-4">
+                    <div class="stat-number">4</div>
+                    <div class="text-secondary mt-2 font-medium">Уровня критичности</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-gradient relative overflow-hidden">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                Готовы проверить свою <span class="text-yellow-300">безопасность</span>?
+            </h2>
+            <p class="text-xl text-purple-100 mb-8">
+                Запустите сканирование прямо сейчас и получите детальный отчет
+            </p>
+            <a href="/scan" class="inline-block bg-white text-purple-600 px-12 py-4 rounded-full text-lg font-bold hover:shadow-2xl transition-all hover:scale-105 pulse-button">
+                <i class="fas fa-rocket mr-3"></i>
+                Начать сканирование
+            </a>
+            <p class="text-purple-200 text-sm mt-4">
+                <i class="fas fa-lock mr-2"></i>
+                Безопасно. Бесплатно. Мгновенно.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary border-t border-custom py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-primary">SecurityScanner</span>
+                    </div>
+                    <p class="text-secondary text-sm">
+                        DevSecOps инструмент для защиты вашей системы
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-primary mb-4">Продукт</h4>
+                    <ul class="space-y-2 text-secondary text-sm">
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">Возможности</a></li>
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">Документация</a></li>
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-primary mb-4">Поддержка</h4>
+                    <ul class="space-y-2 text-secondary text-sm">
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">GitHub</a></li>
+                        <li><a href="#" class="hover:text-purple-600 transition-colors">Telegram</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-primary mb-4">Контакты</h4>
+                    <ul class="space-y-2 text-secondary text-sm">
+                        <li><i class="fas fa-envelope mr-2"></i> support@securityscanner.dev</li>
+                        <li><i class="fab fa-github mr-2"></i> github.com/security-scanner</li>
+                        <li><i class="fab fa-twitter mr-2"></i> @security_scanner</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-custom mt-8 pt-8 text-center text-secondary text-sm">
+                <p>© 2026 Security Scanner. Made with <i class="fas fa-heart text-red-500"></i> for DevSecOps</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Функция переключения темы
+        function toggleTheme() {
+            const root = document.getElementById('html-root');
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            if (root.getAttribute('data-theme') === 'dark') {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.remove('light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                toggle.classList.add('light');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Загрузка сохраненной темы
+        function loadTheme() {
+            const root = document.getElementById('html-root');
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            
+            if (savedTheme === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+                toggle.classList.add('light');
+                icon.className = 'fas fa-sun';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.remove('light');
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        // Плавное появление при скролле
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            observer.observe(el);
+        });
+
+        // Анимация навигации при скролле
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                nav.classList.add('shadow-2xl');
+            } else {
+                nav.classList.remove('shadow-2xl');
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Анимация счетчиков
+        function animateCounters() {
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                const text = stat.textContent;
+                const num = parseInt(text.replace(/[^0-9]/g, ''));
+                if (num) {
+                    let current = 0;
+                    const increment = num / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= num) {
+                            stat.textContent = text;
+                            clearInterval(timer);
+                        } else {
+                            stat.textContent = Math.floor(current) + (text.includes('%') ? '%' : '+');
+                        }
+                    }, 30);
+                }
+            });
+        }
+
+        // Загрузка темы и запуск анимации
+        loadTheme();
+        setTimeout(animateCounters, 500);
+    </script>
+</body>
+</html>

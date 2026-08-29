@@ -1,0 +1,73 @@
+
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <title>Отчет безопасности</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; background: #f0f2f5; }
+                .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; }
+                h1 { color: #1a1a2e; }
+                .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0; }
+                .stat { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+                .stat .number { font-size: 28px; font-weight: bold; }
+                .vuln { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #6c757d; }
+                .vuln.critical { border-left-color: #dc3545; }
+                .vuln.high { border-left-color: #fd7e14; }
+                .vuln.medium { border-left-color: #ffc107; }
+                .vuln.low { border-left-color: #28a745; }
+                .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+                .badge-critical { background: #dc3545; color: white; }
+                .badge-high { background: #fd7e14; color: white; }
+                .badge-medium { background: #ffc107; color: black; }
+                .badge-low { background: #28a745; color: white; }
+                .remediation { background: #e9ecef; padding: 10px; border-radius: 6px; margin-top: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🛡️ Отчет по безопасности системы</h1>
+                <p>Сгенерирован: 30.08.2026 01:04:31</p>
+                <p>Хост: DESKTOP-U9DV63E | ОС: Windows</p>
+
+                <div class="stats">
+                    <div class="stat"><div class="number" style="color:#dc3545;">2</div><div>Всего</div></div>
+                    <div class="stat"><div class="number" style="color:#dc3545;">1</div><div>Критических</div></div>
+                    <div class="stat"><div class="number" style="color:#fd7e14;">1</div><div>Высоких</div></div>
+                    <div class="stat"><div class="number" style="color:#ffc107;">0</div><div>Средних</div></div>
+                    <div class="stat"><div class="number" style="color:#28a745;">0</div><div>Низких</div></div>
+                </div>
+
+                <h2>🔍 Детальный список уязвимостей</h2>
+                
+            <div class="vuln high">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>Устаревшая версия Python</strong>
+                    <span class="badge badge-high">HIGH</span>
+                </div>
+                <p>Обнаружена версия Python 3.10.11, рекомендуется 3.11+</p>
+                <p style="font-size:14px; color:#6c757d;">Компонент: Python | Категория: Безопасность пакетов</p>
+                <div class="remediation"><strong>🔧 Исправление:</strong> Обновите Python до версии 3.11 или выше</div>
+            </div>
+            
+            <div class="vuln critical">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>Устаревшая версия OpenSSL</strong>
+                    <span class="badge badge-critical">CRITICAL</span>
+                </div>
+                <p>Обнаружена версия OpenSSL OpenSSL 1.1.1t  7 Feb 2023, известны уязвимости в версиях ниже 3.0.8</p>
+                <p style="font-size:14px; color:#6c757d;">Компонент: OpenSSL | Категория: Безопасность пакетов</p>
+                <div class="remediation"><strong>🔧 Исправление:</strong> Обновите OpenSSL до версии 3.0.8 или выше</div>
+            </div>
+            
+
+                <h2>📋 Рекомендации</h2>
+                <ul>
+                    <li>Обновите Python до версии 3.11 или выше</li><li>Обновите OpenSSL до версии 3.0.8 или выше</li>
+                </ul>
+
+                <p style="margin-top:30px; color:#6c757d;">Сканирование завершено за 1.77 секунд</p>
+            </div>
+        </body>
+        </html>
+        
